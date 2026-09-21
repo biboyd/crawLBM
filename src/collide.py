@@ -9,7 +9,7 @@ def calc_rho(grid):
     calc rho at every point on the grid
     """
 
-    self.rho = np.sum(grid.grid, axis=2)
+    grid.rho = np.sum(grid.grid, axis=2)
 
 def calc_u(grid):
     """
@@ -19,8 +19,8 @@ def calc_u(grid):
     # construct vector for u
 
     # should prolly unroll this. doing lots of unncessary multiplying by zero
-    self.uvec[:, :, 0] = np.matvec(grid.grid, cx) / grid.rho
-    self.uvec[:, :, 1] = np.matvec(grid.grid, cy) / grid.rho
+    grid.uvec[:, :, 0] = np.matvec(grid.grid, grid.cx) / grid.rho
+    grid.uvec[:, :, 1] = np.matvec(grid.grid, grid.cy) / grid.rho
 
 def calc_feq(grid):
     """
