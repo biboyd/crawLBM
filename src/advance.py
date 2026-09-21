@@ -5,6 +5,7 @@ will advance the code forward. regular output etc.
 import numpy as np
 from collide import do_collision
 from stream import do_stream
+from plotfile import plot_data
 
 
 def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100, dt=1.):
