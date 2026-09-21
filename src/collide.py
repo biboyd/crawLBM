@@ -59,3 +59,20 @@ def do_collision(grid, tau, dt):
     omega = dt/tau
 
     grid.grid = (1-omega) * grid.grid + omega * grid.grid_eq
+
+def do_init_collision(grid, tau, dt):
+    """
+    calculates the collision on the grid and 
+    updates the grid.
+
+    Takes in grid (type Grid) and tau (relaxation time) and timestep, dt, I guess
+    """
+
+    calc_rho(grid)
+    # don't update uvec so always the init
+
+    calc_feq(grid)
+    omega = dt/tau
+
+    grid.grid = (1-omega) * grid.grid + omega * grid.grid_eq
+

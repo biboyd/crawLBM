@@ -7,7 +7,7 @@ from collide import do_collision
 from stream import do_stream
 
 
-def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100):
+def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100, dt=1.):
     """
     runs the sim stepping through collision and stream steps and eventually plotting
     some of the data.
@@ -20,7 +20,7 @@ def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100):
         # colllide
         if VERBOSE:
             print("Entering Collision step")
-        do_collision(grid)
+        do_collision(grid, tau, dt)
 
         # stream/prop 
         if VERBOSE:
