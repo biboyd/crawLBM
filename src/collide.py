@@ -19,8 +19,8 @@ def calc_u(grid):
     # construct vector for u
 
     # should prolly unroll this. doing lots of unncessary multiplying by zero
-    self.uvec[:, :, 0] = np.sum(grid.grid, axis=2, weights=cx) / grid.rho
-    self.uvec[:, :, 1] = np.sum(grid.grid, axis=2, weights=cy) / grid.rho
+    self.uvec[:, :, 0] = np.matvec(grid.grid, cx) / grid.rho
+    self.uvec[:, :, 1] = np.matvec(grid.grid, cy) / grid.rho
 
 def calc_feq(grid):
     """
