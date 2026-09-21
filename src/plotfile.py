@@ -11,6 +11,6 @@ def plot_data(grid, outname='pfile'):
     calc_rho(grid)
     calc_u(grid)
 
-    rho_u = np.dstack((grid.rho, grid.u_vec))
+    rho_u = np.dstack((grid.rho, grid.uvec))
 
     np.save(outname, rho_u)

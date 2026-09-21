@@ -19,8 +19,8 @@ def calc_u(grid):
     # construct vector for u
 
     # should prolly unroll this. doing lots of unncessary multiplying by zero
-    self.u_vec[:, :, 0] = np.sum(grid.grid, axis=2, weights=cx) / grid.rho
-    self.u_vec[:, :, 1] = np.sum(grid.grid, axis=2, weights=cy) / grid.rho
+    self.uvec[:, :, 0] = np.sum(grid.grid, axis=2, weights=cx) / grid.rho
+    self.uvec[:, :, 1] = np.sum(grid.grid, axis=2, weights=cy) / grid.rho
 
 def calc_feq(grid):
     """
@@ -36,12 +36,12 @@ def calc_feq(grid):
     cs2_inv = 3.
     cs4_2_inv = 2.*9.
 
-    vel_term = 1. + cs2_inv * (grid.cx * grid.u_vec[:, :, 0] + 
-                               grid.cy * grid.u_vec[:, :, 1]) 
-                  + cs4_2_inv * (grid.u_vec[:, :, 0]**2 * (grid.cx**2 - 1./cs2_inv) + 
-                               grid.u_vec[:, :, 1]**2 * (grid.cy**2 - 1./cs2_inv) +
-                               2.*grid.u_vec[:, :, 0]*grid.u_vec[:, :, 1] * (grid.cx*grid.cy))
-    grid.grid_eq = weights * grid.rho * vel_term
+    vel_term = 1. + cs2_inv * (np.tensordot(grid.uvec[:, :, 0], grid.cx, 0) +  \
+                               np.tensordot(grid.uvec[:, :, 1], grid.cy, 0) ) \
+               + cs4_2_inv * (np.tensordot(grid.uvec[:, :, 0]**2,grid.cx**2 - 1./cs2_inv, 0) + \
+                              np.tensordot(grid.uvec[:, :, 1]**2,grid.cy**2 - 1./cs2_inv, 0) + \
+                              np.tensordot(2.*grid.uvec[:, :, 0]*grid.uvec[:, :, 1], grid.cx*grid.cy, 0))
+    grid.grid_eq = np.tensordot(grid.rho, grid.weights, 0) * vel_term
 
 
 def do_collision(grid, tau, dt):
