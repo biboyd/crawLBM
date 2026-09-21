@@ -55,7 +55,7 @@ def do_collision(grid, tau, dt):
     calc_rho(grid)
     calc_u(grid)
 
-    calc_freq(grid)
+    calc_feq(grid)
     omega = dt/tau
 
     grid.grid = (1-omega) * grid.grid + omega * grid.grid_eq
