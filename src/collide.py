@@ -84,5 +84,7 @@ def do_stream(grid):
                     np.roll(grid.grid[:, :, idx], axis=0, shift=grid.cx[idx]),
                                   axis=1, shift=grid.cy[idx])
 
+    # hardcoded in periodic BCs but otherwise would do that step here
+
     grid.grid = new_grid
             
