@@ -49,6 +49,7 @@ class Grid:
 
         # init the grid
         self.grid = np.empty((self.nx, self.ny, self.nf))
+        self.grid_eq = np.empty((self.nx, self.ny, self.nf))
 
         # macro vars
         self.rho = np.empty((self.nx, self.ny))
