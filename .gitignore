@@ -1,0 +1,2 @@
+*.npy
+src/__pycache__/
