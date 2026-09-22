@@ -29,7 +29,7 @@ def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100, dt=1.):
         do_stream(grid)
 
         # plot out data every so timesteps
-        if int(max_step) % plot_int  == 0:
+        if i % plot_int  == 0:
             outfile = f"plt{i:07d}.npy"
             plot_data(grid, outname=outfile)
 
