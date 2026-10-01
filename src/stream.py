@@ -70,9 +70,10 @@ def periodic_bc(grid, new_grid, direction, wall):
 
    
 def wall_contrib(weight, rho_w, c_i, U_w):
+    cs2_inv = 3.
     cx, cy = c_i
     U_wx, U_wy = U_w
-    return -2.*weight*rho_w*(cx * U_wx + cy * U_wy)
+    return -2.*cs2_inv*weight*rho_w*(cx * U_wx + cy * U_wy)
 
 def bounceback_bc(grid, new_grid, direction, wall, Uwall = [0., 0.]):
     # set density at wall
