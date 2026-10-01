@@ -22,6 +22,11 @@ def run_sim(args):
         # run analytic soln
         analytic_TG_vortex(nx, ny, args.tau, max_step=args.max_step, plot_int=args.plot_int)
 
+    elif args.init == 'Couette':
+        init_Couette_flow(init_grid)
+
+        # run analytic soln
+        analytic_Couette_flow(nx, ny, args.tau, max_step=args.max_step, plot_int=args.plot_int)
     else:
         raise NotImplementedError(f"{args.init} has not has been implemented. use default")
 
@@ -32,7 +37,7 @@ def run_sim(args):
     advance_sim(init_grid, args.tau, max_step=args.max_step, plot_int=args.plot_int)
 
 
-def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=True):
+def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=False):
 
 
     # create x-y mesh
@@ -76,6 +81,21 @@ def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=True):
         plt.imshow(grid.rho)
         plt.savefig("after_init_rho.png")
 
+def init_Couette_flow(grid, rho_0=1.):
+    # set rho and U
+    grid.rho = np.ones((grid.nx, grid.ny))*rho_0
+    grid.uvec = np.zeros((grid.nx, grid.ny, 2))
+
+    # set grid to eq
+    calc_feq(grid)
+    grid.grid = np.copy(grid.grid_eq)
+
+    # set BCs
+    grid.bc_vertical = ['periodic', 'periodic']
+    grid.bc_horizontal = ['bounceback', 'bounceback']
+
+    grid.bc_kwarg = dict(Uwall=[0., 0.01])
+
 def analytic_TG_vortex(nx, ny, tau, max_step, plot_int):
     # hard coded variables
     k=2*np.pi; rho_0=1.; U_0=0.01
@@ -108,6 +128,25 @@ def analytic_TG_vortex(nx, ny, tau, max_step, plot_int):
             out_arr = np.dstack((curr_ux, curr_uy))
             np.save(outfile, out_arr)
             
+def analytic_Couette_flow(nx, ny, tau, max_step, plot_int, U_0=0.01):
+    # the analytic soln should just be linear flow
+    # create x-y mesh
+    x_axis = np.linspace(0, 1, nx)
+    y_axis = np.linspace(0, 1, ny)
+    x_arr, y_arr = np.meshgrid(x_axis, y_axis)
+
+    # set velocity
+    # Ux linear in y
+    u_vec = np.empty((nx, ny, 2))
+    u_vec[:, :, 0] = y_arr * U_0
+
+    # Uy zero
+    u_vec[:, :, 1] = 0.
+
+    #save plotfile
+    outfile = f"analytic_solution.npy"
+    out_arr = u_vec
+    np.save(outfile, out_arr)
 
 def init_f_rho(grid, p_0, rho_0, p_avg):
     """

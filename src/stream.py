@@ -22,19 +22,18 @@ def do_stream(grid):
                         axis=1, shift=grid.cy[idx])
 
     # apply BCs
-    apply_bc(grid, new_grid)
+    apply_bc(grid, new_grid, kwargs=grid.bc_kwarg)
     # save new grid in current grid
     grid.grid = new_grid
 
-
-def apply_bc(grid, new_grid):
+def apply_bc(grid, new_grid, kwargs=None):
 
     for i, bc_wall in enumerate((grid.bc_vertical, grid.bc_horizontal)):
         for side, bc_type in zip((0, -1), bc_wall):
             if bc_type == 'periodic':
                 periodic_bc(grid, new_grid, side, i)
             elif bc_type == 'bounceback':
-                bounceback_bc(grid, new_grid, side, i)
+                bounceback_bc(grid, new_grid, side, i, **kwargs)
             else:
                 raise RuntimeError(f"Boundary Condition: {bc_type} not implemented")
 
