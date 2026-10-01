@@ -43,7 +43,8 @@ def main(infiles, outdir, minmax_list=None):
                 norm='symlog'
             else:
                 norm=None
-            ax.imshow(var, vmin=curr_range[0], vmax=curr_range[1], norm=norm) 
+            curr_im = ax.imshow(var, vmin=curr_range[0], vmax=curr_range[1], norm=norm, origin='lower') 
+            fig.colorbar(curr_im)
 
             # plot streamlines
             if name == 'rho':
@@ -79,8 +80,10 @@ def analytic_soln(Nsteps=1e3, U_0=0.1, k=2*np.pi, tc=1):
         
         fig, (ax_x, ax_y) = plt.subplots(1, 2, figsize=(8, 8))
 
-        ax_x.imshow(Ux)
-        ax_y.imshow(Uy)
+        curr_imx = ax_x.imshow(Ux, origin='lower')
+        fig.colorbar(curr_imx)
+        curr_imy = ax_y.imshow(Uy, origin='lower')
+        fig.colorbar(curr_imy)
 
         fig.savefig(f"analytic_pfile{i:07d}.png")
         plt.close(fig)

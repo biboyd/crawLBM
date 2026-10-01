@@ -43,10 +43,10 @@ def main(infiles, outdir, minmax_list=None):
             rms = np.sqrt(np.mean((vel - ana_vel)**2))/np.sqrt(np.mean(vel**2))
             #rms = np.sqrt(np.mean((vel )**2))/u_0
 
-            lmag = axes[0, i].imshow(vel/u_0, cmap='RdBu', vmin=-1, vmax=1) 
+            lmag = axes[0, i].imshow(vel/u_0, cmap='RdBu', vmin=-1, vmax=1, origin='lower') 
 
             max_diff = np.max(rel_diff)
-            ldiff = axes[1, i].imshow(rel_diff)#, vmin=-max_diff, vmax=max_diff) 
+            ldiff = axes[1, i].imshow(rel_diff, origin='lower')#, vmin=-max_diff, vmax=max_diff) 
 
             fig.colorbar(lmag)
             fig.colorbar(ldiff)
