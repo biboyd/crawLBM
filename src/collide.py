@@ -16,11 +16,19 @@ def calc_u(grid):
     calc u at every point on the grid
     """
 
-    # construct vector for u
+    # zero old uvec
+    grid.uvec[:, :, :] = np.zeros_like(grid.uvec)
 
-    # should prolly unroll this. doing lots of unncessary multiplying by zero
-    grid.uvec[:, :, 0] = np.matvec(grid.grid, grid.cx) / grid.rho
-    grid.uvec[:, :, 1] = np.matvec(grid.grid, grid.cy) / grid.rho
+    # do x vel contributions
+    for idx in grid.nonzero_x:
+        grid.uvec[:, :, 0] += grid.grid[:, :, idx] * grid.cx[idx]
+
+    for idx in grid.nonzero_y:
+        grid.uvec[:, :, 1] += grid.grid[:, :, idx] * grid.cy[idx]
+
+    # divide by rho
+    grid.uvec[:, :, 0]/=grid.rho
+    grid.uvec[:, :, 1]/=grid.rho
 
 def calc_feq(grid):
     """
@@ -32,9 +40,8 @@ def calc_feq(grid):
     returns feq on each node
     """
 
-    # WIP
     cs2_inv = 3.
-    cs4_2_inv = 2.*9.
+    cs4_2_inv = 0.5 * 9.
 
     vel_term = 1. + cs2_inv * (np.tensordot(grid.uvec[:, :, 0], grid.cx, 0) +  \
                                np.tensordot(grid.uvec[:, :, 1], grid.cy, 0) ) \
