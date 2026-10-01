@@ -38,14 +38,27 @@ class Grid:
         # set num of distributions
         self.nf = 9
         
+        # distribution features
         self.cardinal = np.arange(1, 5, 1)
         self.diag = np.arange(5, 9, 1)
+
+        self.nonzero_x = np.array([1, 3, 5, 6, 7, 8])
+        self.nonzero_y = np.array([2, 4, 5, 6, 7, 8])
+        
+        self.bc = 'None'
+        # bounceback matching
+        self.vertical_wall = np.array([[6, 5],
+                                       [3, 1],
+                                       [7, 8]])
+        self.horizontal_wall = np.array([[6, 7],
+                                       [2, 4],
+                                       [5, 8]])
 
         # setup actual weights and vel and such
         self.weights = np.array([4./9, 1./9., 1./9., 1./9., 1./9.,
                                  1./36., 1./36., 1./36.,1./36., ])
-        self.cx = np.array([0, 1., 0, -1., 0, 1., -1., -1., 1.])
-        self.cy = np.array([0, 0, 1., 0, -1., 1., 1., -1., -1.])
+        self.cx = np.array([0, 1, 0, -1, 0, 1, -1, -1, 1])
+        self.cy = np.array([0, 0, 1, 0, -1, 1, 1, -1, -1])
 
         # init the grid
         self.grid = np.empty((self.nx, self.ny, self.nf))
