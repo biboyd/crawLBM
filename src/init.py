@@ -15,6 +15,14 @@ def run_sim(args):
     nx, ny = args.domain_size
     init_grid = Grid(nx, ny)
 
+
+    # hard coded variables
+    rho_0=1.; U_0=0.01
+    delx = 1/nx
+    nu = 1/3. * (args.tau - 1./2)*delx**2 # assuming dt=1 and cs^2= 1/3
+    print(f"Viscosity nu= {nu:0.2e}")
+    print(f"Re= {U_0 / nu:0.2e}")
+
     # init vel field
     if args.init == 'TG-vortex':
         init_TG_vortex(init_grid)
@@ -94,7 +102,8 @@ def init_Couette_flow(grid, rho_0=1.):
     grid.bc_vertical = ['periodic', 'periodic']
     grid.bc_horizontal = ['bounceback', 'bounceback']
 
-    grid.bc_kwarg = dict(Uwall=[0., 0.01])
+    grid.bc_horizontal_kwarg = dict(Uwall=[[0., 0.],
+                                           [0.01, 0.]])
 
 def analytic_TG_vortex(nx, ny, tau, max_step, plot_int):
     # hard coded variables

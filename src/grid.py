@@ -47,6 +47,8 @@ class Grid:
         
         self.bc_vertical = ['None', 'None']
         self.bc_horizontal = ['None', 'None']
+        self.bc_vertical_kwarg = None
+        self.bc_horizontal_kwarg = None
 
         # bounceback matching
         self.vertical_wall = np.array([[6, 5],
