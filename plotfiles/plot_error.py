@@ -64,6 +64,7 @@ def main(infiles, outdir, minmax_list=None):
                 time_ax.plot(t, rms, tmark, color=tcolor, label=f'rms {name}')
             else:
                 time_ax.plot(t, rms, tmark, color=tcolor)
+                print(f'Time: {t:0.2e}; Err: {rms:0.4e}')
 
         mean_mag = np.mean( np.sqrt(analytic_vel[:, :, 0]**2 + analytic_vel[:, :, 1]**2)   )
 
