@@ -45,14 +45,16 @@ class Grid:
         self.nonzero_x = np.array([1, 3, 5, 6, 7, 8])
         self.nonzero_y = np.array([2, 4, 5, 6, 7, 8])
         
-        self.bc = 'None'
+        self.bc_vertical = ['None', 'None']
+        self.bc_horizontal = ['None', 'None']
+
         # bounceback matching
         self.vertical_wall = np.array([[6, 5],
                                        [3, 1],
                                        [7, 8]])
-        self.horizontal_wall = np.array([[6, 7],
-                                       [2, 4],
-                                       [5, 8]])
+        self.horizontal_wall = np.array([[7, 6],
+                                       [4, 2],
+                                       [8, 5]])
 
         # setup actual weights and vel and such
         self.weights = np.array([4./9, 1./9., 1./9., 1./9., 1./9.,

@@ -41,7 +41,8 @@ def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=True):
     x_arr, y_arr = np.meshgrid(x_axis, y_axis)
 
     # set BC
-    grid.bc = 'periodic'
+    grid.bc_vertical = ['periodic', 'periodic']
+    grid.bc_horizontal = ['periodic', 'periodic']
 
     # set init velocity
     grid.uvec[:, :, 0] = -U_0 * np.cos(k * x_arr) * np.sin(k * y_arr)
