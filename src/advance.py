@@ -8,7 +8,7 @@ from stream import do_stream
 from plotfile import plot_data
 
 
-def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100, dt=1.):
+def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100, plot_dir='./', dt=1.):
     """
     runs the sim stepping through collision and stream steps and eventually plotting
     some of the data.
@@ -42,7 +42,7 @@ def advance_sim(grid, tau, max_step=1e3, VERBOSE=False, plot_int=100, dt=1.):
         # plot out data every so timesteps
         if i % plot_int  == 0:
             #print(f"Total Mass at step {i}: {np.sum(grid.rho):0.3e}")
-            outfile = f"plt{i:07d}.npy"
+            outfile = f"{plot_dir}/plt{i:07d}.npy"
             plot_data(grid, outname=outfile)
 
 

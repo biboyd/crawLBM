@@ -4,11 +4,13 @@ fill distribution functions
 """
 
 from argparse import ArgumentParser 
+from os import makedirs
+import numpy as np
+
 from grid import Grid
 from collide import calc_feq, do_init_collision,calc_u, calc_rho
 from stream import do_stream
 from advance import advance_sim
-import numpy as np
 
 def run_sim(args):
 
@@ -41,8 +43,12 @@ def run_sim(args):
     # relax distribution prior to running sim
     run_initialization(init_grid, args.init_steps, args.tau)
 
+    # setup plot dir
+    makedirs(args.plot_dir, exist_ok=True)
+
     # run sim
-    advance_sim(init_grid, args.tau, max_step=args.max_step, plot_int=args.plot_int)
+    advance_sim(init_grid, args.tau, max_step=args.max_step,
+                plot_int=args.plot_int, plot_dir=args.plot_dir)
 
 
 def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=False):
@@ -213,6 +219,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--max_step', type=float, default=1e3, help='Max number of timesteps before stopping')
     parser.add_argument('--plot_int', type=int, default=100, help='n steps to plot out')
+    parser.add_argument('--plot_dir', type=str, default='./', help='directory to save plotfiles')
 
     args = parser.parse_args()
     run_sim(args)
