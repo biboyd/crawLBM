@@ -14,23 +14,45 @@ from advance import advance_sim
 
 def run_sim(args):
 
-    nx, ny = args.domain_size
+
+    # set grid size and spacing
+    Lx, Ly = args.domain_size
+    grid_spacing = max(Lx, Ly)/args.domain_resolution
+    nx = int(Lx/grid_spacing)
+    ny = int(Ly/grid_spacing)
+
+    # calc Re number
+    Re = args.U_ref * max(Lx, Ly)/args.nu
+
+    # calc lattice viscosity
+    nu_lat = (1./3.) * (args.tau - 0.5) # assuming cs^2= 1/3
+
+    # calc conversion factors
+    C_x = grid_spacing # this sets del_x_phy assuming del_x_lat = 1.
+    C_t = nu_lat * C_x**2/args.nu # this set del_t_phys assuming del_t_lat = 1.
+    #C_rho = args.rho_ref / 1.0 # assuming rho_lat = 1
+
+    Ma = args.U_ref * C_t /C_x * (1/np.sqrt(3))
+    
+    # print out params
+    VERBOSE = True
+    if VERBOSE:
+        print(f"nu_phy: {args.nu} m^2/s")
+        print(f"Timestep: {C_t} s")
+        print(f"Spacing: {C_x} m")
+        print(f"nu_lat: {nu_lat} lu^2/ts")
+        print(f"U_lat: {args.U_ref * C_t/C_x} lu/ts")
+        print(f"Re: {Re}")
+        print(f"Ma: {Ma}")
+
     init_grid = Grid(nx, ny)
-
-
-    # hard coded variables
-    rho_0=1.; U_0=0.01
-    delx = 1/nx
-    nu = 1/3. * (args.tau - 1./2)*delx**2 # assuming dt=1 and cs^2= 1/3
-    print(f"Viscosity nu= {nu:0.2e}")
-    print(f"Re= {U_0 / nu:0.2e}")
 
     # init vel field
     if args.init == 'TG-vortex':
-        init_TG_vortex(init_grid)
+        init_TG_vortex(init_grid, Lx, Ly, U_0=args.U_ref)
 
         # run analytic soln
-        analytic_TG_vortex(nx, ny, args.tau, max_step=args.max_step, plot_int=args.plot_int)
+        analytic_TG_vortex(nx, ny, Lx, Ly, args.nu, args.max_step, args.plot_int, dt_phy=C_t, U_0=args.U_ref)
 
     elif args.init == 'Couette':
         init_Couette_flow(init_grid)
@@ -47,16 +69,19 @@ def run_sim(args):
     makedirs(args.plot_dir, exist_ok=True)
 
     # run sim
-    advance_sim(init_grid, args.tau, max_step=args.max_step,
+    advance_sim(init_grid, args.tau, dt_phy = C_t, max_step=args.max_step,
                 plot_int=args.plot_int, plot_dir=args.plot_dir)
 
 
-def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=False):
+def init_TG_vortex(grid, Lx, Ly, rho_0=1., U_0=0.01, VERBOSE=False):
 
+    # calc const
+    kx = 2*np.pi/Lx
+    ky = 2*np.pi/Ly
 
     # create x-y mesh
-    x_axis = np.linspace(0, 1, grid.nx)
-    y_axis = np.linspace(0, 1, grid.ny)
+    x_axis = np.linspace(0, Lx, grid.nx)
+    y_axis = np.linspace(0, Ly, grid.ny)
     x_arr, y_arr = np.meshgrid(x_axis, y_axis)
 
     # set BC
@@ -64,8 +89,8 @@ def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=False):
     grid.bc_horizontal = ['periodic', 'periodic']
 
     # set init velocity
-    grid.uvec[:, :, 0] = -U_0 * np.cos(k * x_arr) * np.sin(k * y_arr)
-    grid.uvec[:, :, 1] = U_0 * np.sin(k * x_arr) * np.cos(k * y_arr)
+    grid.uvec[:, :, 0] = -U_0 * np.cos(kx * x_arr) * np.sin(ky * y_arr)
+    grid.uvec[:, :, 1] = U_0 * np.sin(kx * x_arr) * np.cos(ky * y_arr)
 
     if VERBOSE:
         import matplotlib.pyplot as plt
@@ -73,7 +98,7 @@ def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=False):
         plt.savefig("init_ux.png")
 
     # set init pressure
-    p_0 = -rho_0 * U_0**2 * (np.cos(2*k*x_arr) + np.cos(2*k*y_arr)) / 4.
+    p_0 = -rho_0 * U_0**2 * (np.cos(2*kx*x_arr) + np.cos(2*ky*y_arr)) / 4.
     p_avg = np.mean(p_0) 
 
     if VERBOSE:
@@ -111,32 +136,32 @@ def init_Couette_flow(grid, rho_0=1.):
     grid.bc_horizontal_kwarg = dict(Uwall=[[0., 0.],
                                            [0.01, 0.]])
 
-def analytic_TG_vortex(nx, ny, tau, max_step, plot_int):
-    # hard coded variables
-    k=2*np.pi; rho_0=1.; U_0=0.01
-    delx = 1/nx
-    nu = 1/3. * (tau - 1./2)*delx**2 # assuming dt=1 and cs^2= 1/3
-    print(f"Viscosity nu= {nu:0.2e}")
-    print(f"Re= {U_0 / nu:0.2e}")
-    t_c_inv = 2*nu * k**2 
+def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.01):
+    # calc viscous time
+    kx = 2 * np.pi / Lx
+    ky = 2 * np.pi / Ly
+    t_c_inv = nu * (kx**2 +ky**2)
+    print(t_c_inv)
+    print(t_c_inv*dt_phy)
 
     # create x-y mesh
-    x_axis = np.linspace(0, 1, nx)
-    y_axis = np.linspace(0, 1, ny)
+    x_axis = np.linspace(0, Lx, nx)
+    y_axis = np.linspace(0, Ly, ny)
     x_arr, y_arr = np.meshgrid(x_axis, y_axis)
 
     uvec = np.ndarray((ny, nx, 2))
     # set init velocity
-    uvec[:, :, 0] = -U_0 * np.cos(k * x_arr) * np.sin(k * y_arr)
-    uvec[:, :, 1] = U_0 * np.sin(k * x_arr) * np.cos(k * y_arr)
+    uvec[:, :, 0] = -U_0 * np.cos(kx * x_arr) * np.sin(ky * y_arr)
+    uvec[:, :, 1] = U_0 * np.sin(kx * x_arr) * np.cos(ky * y_arr)
 
     for i in range(int(max_step)):
 
         if i % plot_int == 0:
-            time = i+1
+            time = dt_phy * (i+1)
             #calc u's for curr time
             curr_ux = uvec[:, :, 0] * np.exp(-time*t_c_inv)
             curr_uy = uvec[:, :, 1] * np.exp(-time*t_c_inv)
+            print('Time <Ux>:', time, np.mean(np.sqrt(curr_ux**2+curr_uy**2)))
 
             #save plotfile
             outfile = f"analytic{i:07d}.npy"
@@ -210,8 +235,11 @@ if __name__ == '__main__':
 
     #parser.add_argument('--inputs', help='inputs file for the arg')
 
-    parser.add_argument('--domain_size', nargs=2, type=int, default=[10, 10], 
-                        help='Size of domain size in x and y dir')
+    parser.add_argument('--domain_size', nargs=2, type=float, default=[1, 1], 
+                        help='Size of domain size in x and y dir (SI Units)')
+
+    parser.add_argument('--domain_resolution', type=int, default=64,
+                        help='resolution in longest direction')
 
     parser.add_argument('--init', type=str, default='TG-vortex',
                         help='What sort of initialization to use. \
@@ -219,11 +247,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--init_steps', type=float, default=100, help='number of times to relax init field')
 
-    parser.add_argument('--tau', type=float, default=0.5, help='Relaxation time.')
+    parser.add_argument('--tau', type=float, default=0.8, help='Relaxation time. must be greater than 0.5')
+    parser.add_argument('--nu', type=float, default=1e-6, help='Physical viscosity (SI units)')
+    parser.add_argument('--U_ref', type=float, default=0.01, help='Physical velocity scale. Sets U_0 depending on init setups (SI units).')
+    parser.add_argument('--rho_ref', type=float, default=1., help='Physical density scale. Sets rho_0 depending on init setups (SI units).')
 
-    parser.add_argument('--max_step', type=float, default=1e3, help='Max number of timesteps before stopping')
-    parser.add_argument('--plot_int', type=int, default=100, help='n steps to plot out')
-    parser.add_argument('--plot_dir', type=str, default='./', help='directory to save plotfiles')
+    parser.add_argument('--max_step', type=float, default=1e3, help='Max number of timesteps before stopping.')
+    parser.add_argument('--plot_int', type=int, default=100, help='Save a plotfile for every given timesteps.')
+    parser.add_argument('--plot_dir', type=str, default='./', help='directory to save plotfiles in.')
 
     args = parser.parse_args()
     run_sim(args)

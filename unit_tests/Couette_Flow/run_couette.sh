@@ -8,7 +8,7 @@ plot_path=../../plotfiles
 problem='Couette'
 Nx=80
 Ny=40
-tau=1.2
+tau=0.8
 steps=4e3
 plots=100
 

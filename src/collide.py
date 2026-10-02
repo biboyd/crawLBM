@@ -51,7 +51,7 @@ def calc_feq(grid):
     grid.grid_eq = np.tensordot(grid.rho, grid.weights, 0) * vel_term
 
 
-def do_collision(grid, tau, dt):
+def do_collision(grid, tau):
     """
     calculates the collision on the grid and 
     updates the grid.
@@ -63,7 +63,7 @@ def do_collision(grid, tau, dt):
     calc_u(grid)
 
     calc_feq(grid)
-    omega = dt/tau
+    omega = 1./tau
 
     grid.grid = (1-omega) * grid.grid + omega * grid.grid_eq
 
