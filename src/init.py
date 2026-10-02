@@ -67,7 +67,7 @@ def run_sim(args):
         init_Couette_flow(init_grid, U_0=args.U_ref)
 
         # run analytic soln
-        analytic_Couette_flow(nx, ny, U_0=args.U_ref)
+        analytic_Couette_flow(nx, ny, Lx, Ly, U_0=args.U_ref)
     else:
         raise NotImplementedError(f"{args.init} has not has been implemented. use default")
 
@@ -150,8 +150,6 @@ def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.
     kx = 2 * np.pi / Lx
     ky = 2 * np.pi / Ly
     t_c_inv = nu * (kx**2 +ky**2)
-    print(t_c_inv)
-    print(t_c_inv*dt_phy)
 
     # create x-y mesh
     x_axis = np.linspace(0, Lx, nx)
@@ -170,25 +168,24 @@ def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.
             #calc u's for curr time
             curr_ux = uvec[:, :, 0] * np.exp(-time*t_c_inv)
             curr_uy = uvec[:, :, 1] * np.exp(-time*t_c_inv)
-            print('Time <Ux>:', time, np.mean(np.sqrt(curr_ux**2+curr_uy**2)))
 
             #save plotfile
             outfile = f"analytic{i:07d}.npy"
             out_arr = np.dstack((curr_ux, curr_uy))
             np.save(outfile, out_arr)
             
-def analytic_Couette_flow(nx, ny, U_0=0.01):
+def analytic_Couette_flow(nx, ny, Lx, Ly, U_0=0.01):
     # the analytic soln should just be linear flow
     # create x-y mesh
-    x_axis = np.linspace(0, 1, nx)
-    y_axis = np.linspace(0, 1, ny)
+    x_axis = np.linspace(0, Lx, nx)
+    y_axis = np.linspace(0, Ly, ny)
     x_arr, y_arr = np.meshgrid(x_axis, y_axis)
 
     # construct velocity arr
     u_vec = np.empty((ny, nx, 2))
 
     # Ux linear in y
-    u_vec[:, :, 0] = y_arr * U_0
+    u_vec[:, :, 0] = y_arr * U_0/Ly
 
     # Uy zero
     u_vec[:, :, 1] = 0.
