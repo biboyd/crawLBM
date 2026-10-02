@@ -11,7 +11,7 @@ def main(infiles, outdir, minmax_list=None):
     for f in infiles:
         # extract base file name
         basefile = f.split('/')[-1]
-        basename = f.removesuffix('.npy')
+        basename = basefile.removesuffix('.npy')
 
         curr_arr = np.load(f)
 
@@ -30,8 +30,8 @@ def main(infiles, outdir, minmax_list=None):
             var_range = minmax_list
 
         # set grid for streamlines
-        X, Y = np.meshgrid(np.arange(0, len(curr_arr[:, 0, 0])), 
-                           np.arange(0, len(curr_arr[0, :, 0])))
+        X, Y = np.meshgrid(np.arange(0, len(curr_arr[0, :, 0])), 
+                           np.arange(0, len(curr_arr[:, 0, 0])))
         # loop over all variables
         for i, (name, ax, curr_range) in enumerate(zip(var_names, axes.flatten(), var_range)):
 
@@ -103,12 +103,18 @@ if __name__ == '__main__':
     parser.add_argument('input_files', nargs='*', type=str, 
                         help='files to plot out')
 
-    parser.add_argument('-o', '--outdir', nargs=1, type=str, 
+    parser.add_argument('-o', '--outdir', type=str, 
                         default='./',
                         help='directory to plot out to')
     args = parser.parse_args()
 
-    minmax_list = calc_minmax('./', 'plt00')
+    # piece together infiles path
+    infile_path_list = args.input_files[0].split('/')[:-1]
+    infile_path = '' 
+    for seg in infile_path_list:
+        infile_path += seg + '/'
+
+    minmax_list = calc_minmax(infile_path, 'plt00')
     main(args.input_files, args.outdir, minmax_list)
 
     #analytic_soln(Nsteps=1e3, U_0=0.1, k=2*np.pi, tc=1)

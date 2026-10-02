@@ -12,9 +12,10 @@ def calc_minmax(directory, file_naming):
         if file_naming in f and f[-4:] == '.npy':
             # load in np array
             try:
-                arr = np.load(f)
+                arr = np.load(f"{directory}/{f}")
             except:
                 print(f"can't open {f}. skipping it")
+                continue
                 
             var_names = ["rho", "p", "u_x", "u_y"]
 

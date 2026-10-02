@@ -16,7 +16,7 @@ def main(infiles, outdir):
     for f in infiles:
         # extract base file name
         basefile = f.split('/')[-1]
-        basename = f.removesuffix('.npy')
+        basename = basefile.removesuffix('.npy')
 
 
         # recover time from basename
@@ -37,7 +37,7 @@ def main(infiles, outdir):
         # calc rms
         rms = np.sqrt(np.mean((vel-ana_vel )**2))/u_0
 
-        lmag = axes[0].imshow(vel/u_0, cmap='RdBu', vmin=-1, vmax=1, origin='lower') 
+        lmag = axes[0].imshow(vel/u_0, cmap='Blues', vmin=0, vmax=1, origin='lower') 
 
         max_diff = np.max(rel_diff)
         ldiff = axes[1].imshow(rel_diff, origin='lower')
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('input_files', nargs='*', type=str, 
                         help='files to plot out')
 
-    parser.add_argument('-o', '--outdir', nargs=1, type=str, 
+    parser.add_argument('-o', '--outdir', type=str, 
                         default='./',
                         help='directory to plot out to')
     args = parser.parse_args()
