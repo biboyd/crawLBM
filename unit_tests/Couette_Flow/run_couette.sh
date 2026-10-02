@@ -22,8 +22,8 @@ python ${sim_path}/init.py --init ${problem} --domain_size $Lx $Ly         \
                       --init_steps=0 
 
 # generate plots
-#mkdir -p images/ analytic_images/
-#python ${plot_path}/plot_plotfile.py plotfiles/plt*.npy plt_after_initialization.npy -o images/
-#
-## calc error vs analytic soln
-#python plot_couette_error.py plotfiles/plt00*.npy -o analytic_images/
+mkdir -p images/ analytic_images/
+python ${plot_path}/plot_plotfile.py plotfiles/plt*.npy plt_after_initialization.npy -o images/
+
+# calc error vs analytic soln
+python plot_couette_error.py plotfiles/plt00*.npy -o analytic_images/
