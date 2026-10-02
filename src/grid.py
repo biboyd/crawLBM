@@ -65,10 +65,10 @@ class Grid:
         self.cy = np.array([0, 0, 1, 0, -1, 1, 1, -1, -1])
 
         # init the grid
-        self.grid = np.empty((self.nx, self.ny, self.nf))
-        self.grid_eq = np.empty((self.nx, self.ny, self.nf))
+        self.grid = np.empty((self.ny, self.nx, self.nf))
+        self.grid_eq = np.empty((self.ny, self.nx, self.nf))
 
         # macro vars
-        self.rho = np.empty((self.nx, self.ny))
-        self.uvec = np.empty((self.nx, self.ny, 2))
+        self.rho = np.empty((self.ny, self.nx))
+        self.uvec = np.empty((self.ny, self.nx, 2))
 

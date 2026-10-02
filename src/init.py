@@ -91,8 +91,8 @@ def init_TG_vortex(grid, k=2*np.pi, rho_0=1., U_0=0.01, VERBOSE=False):
 
 def init_Couette_flow(grid, rho_0=1.):
     # set rho and U
-    grid.rho = np.ones((grid.nx, grid.ny))*rho_0
-    grid.uvec = np.zeros((grid.nx, grid.ny, 2))
+    grid.rho = np.ones((grid.ny, grid.nx))*rho_0
+    grid.uvec = np.zeros((grid.ny, grid.nx, 2))
 
     # set grid to eq
     calc_feq(grid)
@@ -119,7 +119,7 @@ def analytic_TG_vortex(nx, ny, tau, max_step, plot_int):
     y_axis = np.linspace(0, 1, ny)
     x_arr, y_arr = np.meshgrid(x_axis, y_axis)
 
-    uvec = np.ndarray((nx, ny, 2))
+    uvec = np.ndarray((ny, nx, 2))
     # set init velocity
     uvec[:, :, 0] = -U_0 * np.cos(k * x_arr) * np.sin(k * y_arr)
     uvec[:, :, 1] = U_0 * np.sin(k * x_arr) * np.cos(k * y_arr)
@@ -146,7 +146,7 @@ def analytic_Couette_flow(nx, ny, tau, max_step, plot_int, U_0=0.01):
 
     # set velocity
     # Ux linear in y
-    u_vec = np.empty((nx, ny, 2))
+    u_vec = np.empty((ny, nx, 2))
     u_vec[:, :, 0] = y_arr * U_0
 
     # Uy zero
