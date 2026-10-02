@@ -178,6 +178,8 @@ def init_f_rho(grid, p_0, rho_0, p_avg):
 
 def run_initialization(grid, Nsteps, tau, dt=1.):
     """
+    WIP
+
     once we init a distribution and velocity we need to then relax
     to an appropriate solution. Do this by just repeating stream/collide basically
     but keeping vel0 constant and wanting to end on a propogate so start of sim is
@@ -188,12 +190,14 @@ def run_initialization(grid, Nsteps, tau, dt=1.):
     essentially do the collide propagate but keep velocity fixed at all times.
     """
 
-    for i in range(int(Nsteps)):
-        # collide
-        do_init_collision(grid, tau, dt)
+    pass
+    # WIP
+    #for i in range(int(Nsteps)):
+    #    # collide
+    #    do_init_collision(grid, tau, dt)
 
-        # propogate/stream
-        do_stream(grid)
+    #    # propogate/stream
+    #    do_stream(grid)
     
 
 if __name__ == '__main__':
