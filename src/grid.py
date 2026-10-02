@@ -51,12 +51,12 @@ class Grid:
         self.bc_horizontal_kwarg = None
 
         # bounceback matching
-        self.vertical_wall = np.array([[6, 5],
+        self.vertical_wall = np.array([[6, 8],
                                        [3, 1],
-                                       [7, 8]])
-        self.horizontal_wall = np.array([[7, 6],
+                                       [7, 5]])
+        self.horizontal_wall = np.array([[7, 5],
                                        [4, 2],
-                                       [8, 5]])
+                                       [8, 6]])
 
         # setup actual weights and vel and such
         self.weights = np.array([4./9, 1./9., 1./9., 1./9., 1./9.,

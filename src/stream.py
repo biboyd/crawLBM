@@ -28,12 +28,12 @@ def do_stream(grid):
 
 def apply_bc(grid, new_grid):
 
-    for i, bc_wall in enumerate((grid.bc_vertical, grid.bc_horizontal)):
+    for which_walls, bc_wall in enumerate((grid.bc_vertical, grid.bc_horizontal)):
         for side, bc_type in zip((0, -1), bc_wall):
             if bc_type == 'periodic':
-                periodic_bc(grid, new_grid, side, i)
+                periodic_bc(grid, new_grid, side, which_walls)
             elif bc_type == 'bounceback':
-                bounceback_bc(grid, new_grid, side, i, grid.bc_vertical_kwarg, grid.bc_horizontal_kwarg)
+                bounceback_bc(grid, new_grid, side, which_walls, grid.bc_vertical_kwarg, grid.bc_horizontal_kwarg)
             else:
                 raise RuntimeError(f"Boundary Condition: {bc_type} not implemented")
 
@@ -111,16 +111,16 @@ def bounceback_bc(grid, new_grid, direction, wall, bc_vertical_kwarg, bc_horizon
         else:
             Uwall_bot = [0., 0.]
             Uwall_top = [0., 0.]
-        # bot
+
         if direction == 0:
-            # bounce on top
+            # bounce bot wall
             for d_i, u_i in grid.horizontal_wall:
                 wall_term = wall_contrib(grid.weights[d_i], rho_w,
                                          (grid.cx[d_i], grid.cy[d_i]), Uwall_bot) 
                 new_grid[0, :, u_i] = grid.grid[0, :, d_i] + wall_term
-        # top
+
         elif direction == -1:
-            #bounce bot wall
+            #bounce top wall
             for d_i, u_i in grid.horizontal_wall:
                 wall_term = wall_contrib(grid.weights[u_i], rho_w,
                                          (grid.cx[u_i], grid.cy[u_i]), Uwall_top) 
