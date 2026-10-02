@@ -46,6 +46,14 @@ def run_sim(args):
         print(f"Re: {Re}")
         print(f"Ma: {Ma}")
 
+        # Verify constraints
+        if Ma >= 0.1:
+            raise ValueError(f"Mach number {Ma:.4f} >= 0.1! Reduce U_ref or increase resolution.")
+        if args.tau <= 0.5:
+            raise ValueError(f"tau {args.tau} <= 0.5! Increase tau for positive viscosity.")
+        if args.tau >= 1.8:
+            print(f"Warning: tau {args.tau} >= 1.8 may cause numerical instability.")
+
     init_grid = Grid(nx, ny)
 
     # init vel field
