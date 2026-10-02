@@ -16,7 +16,7 @@ def main(infiles, outdir, minmax_list=None):
     for f in infiles:
         # extract base file name
         basefile = f.split('/')[-1]
-        basename = f.removesuffix('.npy')
+        basename = basefile.removesuffix('.npy')
         analytic_name = f"analytic{basename.removeprefix('plt')}"
 
 
