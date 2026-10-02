@@ -66,9 +66,11 @@ def main(infiles, outdir, minmax_list=None):
                 time_ax.plot(t, rms, tmark, color=tcolor)
                 print(f'Time: {t:0.2e}; Err: {rms:0.4e}')
 
-        mean_mag = np.mean( np.sqrt(analytic_vel[:, :, 0]**2 + analytic_vel[:, :, 1]**2)   )
-
+        mean_mag = np.mean( np.sqrt(curr_vel[:, :, 0]**2 + curr_vel[:, :, 1]**2)   )
         mag_ax.plot(t, mean_mag/u_0, 'ko', ) 
+
+        true_mag = np.mean( np.sqrt(analytic_vel[:, :, 0]**2 + analytic_vel[:, :, 1]**2)   )
+        mag_ax.plot(t, true_mag/u_0, 'x', color='tab:orange') 
         # save file
         fig.tight_layout()
         fig.savefig(f"{outdir}/analytic_comp{basename}.png", bbox_inches='tight')
@@ -82,10 +84,6 @@ def main(infiles, outdir, minmax_list=None):
     time_fig.savefig(f"{outdir}/error_over_time.png")
     
             
-
-
-
-
 if __name__ == '__main__':
 
     parser = ArgumentParser(
