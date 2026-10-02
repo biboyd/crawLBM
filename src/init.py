@@ -98,8 +98,8 @@ def init_TG_vortex(grid, Lx, Ly, rho_0=1., U_0=0.01, VERBOSE=False):
     grid.bc_horizontal = ['periodic', 'periodic']
 
     # set init velocity
-    grid.uvec[:, :, 0] = -U_0 * np.cos(kx * x_arr) * np.sin(ky * y_arr)
-    grid.uvec[:, :, 1] = U_0 * np.sin(kx * x_arr) * np.cos(ky * y_arr)
+    grid.uvec[:, :, 0] = -U_0 * np.sqrt(ky/kx) * np.cos(kx * x_arr) * np.sin(ky * y_arr)
+    grid.uvec[:, :, 1] = U_0 * np.sqrt(kx/ky) * np.sin(kx * x_arr) * np.cos(ky * y_arr)
 
     if VERBOSE:
         import matplotlib.pyplot as plt
