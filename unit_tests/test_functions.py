@@ -1,10 +1,15 @@
 """
 Unit tests for core LBM functions: streaming, collision, and boundary conditions.
+
+Run with:  pytest unit_tests/test_functions.py -v
+       or: python unit_tests/test_functions.py
 """
 
 import sys
 import os
 import numpy as np
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from grid import Grid
@@ -22,26 +27,39 @@ def _make_grid(nx=6, ny=6):
     return g
 
 
-def test_do_stream():
-    """
-    A distribution placed at [i, j, idx] should appear at
-    [i + cx[idx], j + cy[idx]] after one stream step under periodic BCs.
+# ---------------------------------------------------------------------------
+# Streaming
+# ---------------------------------------------------------------------------
 
-    Direction 5 (cx=1, cy=1) is used because periodic_bc only asserts on
-    the four cardinal directions (1-4), keeping the test independent of that check.
+@pytest.mark.parametrize("idx", range(9))
+def test_do_stream(idx):
     """
-    g = _make_grid()
+    Every distribution direction shifts by exactly (cx[idx], cy[idx]) in one
+    stream step.  The grid is large enough (8x8, tracer at [4,4]) that no
+    direction reaches a boundary, so periodic_bc assertions are trivially
+    satisfied without wrap-around complicating the check.
+    """
+    g = _make_grid(nx=8, ny=8)
     g.bc_vertical = ['periodic', 'periodic']
     g.bc_horizontal = ['periodic', 'periodic']
 
-    i, j = 2, 3
-    g.grid[i, j, 5] = 1.0  # f_5: cx=1, cy=1
+    i0, j0 = 4, 4
+    g.grid[i0, j0, idx] = 1.0
 
     do_stream(g)
 
-    assert g.grid[i + 1, j + 1, 5] == 1.0, "f_5 did not reach (i+1, j+1)"
-    assert g.grid[i, j, 5] == 0.0, "f_5 should have vacated the source cell"
+    i1 = i0 + g.cx[idx]
+    j1 = j0 + g.cy[idx]
+    assert g.grid[i1, j1, idx] == 1.0, \
+        f"dir {idx} (cx={g.cx[idx]}, cy={g.cy[idx]}): expected 1.0 at [{i1},{j1}]"
+    if idx != 0:   # direction 0 is the rest distribution; it stays in place
+        assert g.grid[i0, j0, idx] == 0.0, \
+            f"dir {idx}: source cell [{i0},{j0}] should be vacated"
 
+
+# ---------------------------------------------------------------------------
+# Collision
+# ---------------------------------------------------------------------------
 
 def test_calc_feq():
     """
@@ -80,6 +98,10 @@ def test_do_collision():
         )
 
 
+# ---------------------------------------------------------------------------
+# Periodic BC
+# ---------------------------------------------------------------------------
+
 def test_periodic_bc():
     """
     Under periodic BCs, a distribution that exits one boundary must re-enter
@@ -90,7 +112,7 @@ def test_periodic_bc():
     g.bc_vertical = ['periodic', 'periodic']
     g.bc_horizontal = ['periodic', 'periodic']
 
-    # f_2 at the last column; after rolling axis=1 by cy[2]=1 it should wrap to column 0
+    # f_2 at the last column; rolling axis=1 by cy[2]=1 wraps it to column 0
     g.grid[2, -1, 2] = 1.0
 
     do_stream(g)
@@ -99,37 +121,87 @@ def test_periodic_bc():
     assert g.grid[2, -1, 2] == 0.0, "f_2 should have left the last column"
 
 
-def test_bounceback_bc():
+# ---------------------------------------------------------------------------
+# Bounceback BCs
+# ---------------------------------------------------------------------------
+
+def test_bounceback_bc_horizontal_stationary():
     """
-    With a stationary bounceback wall at axis=0 row 0, downward-moving
-    distributions (f_4, d_i=4) are reflected as upward-moving distributions
-    (f_2, u_i=2) at the same boundary row, with zero wall contribution.
+    Stationary horizontal bounceback wall at row 0 (axis=0 boundary).
+    The horizontal_wall pair (d_i=4, u_i=2) maps f_4 -> f_2 with no wall term.
     """
     g = _make_grid(nx=6, ny=6)
     g.bc_vertical = ['periodic', 'periodic']
-    g.bc_horizontal = ['bounceback', 'periodic']  # bounceback only at row 0
+    g.bc_horizontal = ['bounceback', 'periodic']
 
     val = 0.5
-    g.grid[0, :, 4] = val  # f_4 (cx=0, cy=-1) sitting at the wall row
+    g.grid[0, :, 4] = val  # f_4 (cx=0, cy=-1) at the wall row
 
     do_stream(g)
 
-    # horizontal_wall pair (d_i=4, u_i=2); wall_term=0 for stationary wall
     np.testing.assert_allclose(
         g.grid[0, :, 2], val, rtol=1e-12,
-        err_msg="f_4 was not reflected back as f_2 by the bounceback wall"
+        err_msg="f_4 was not reflected as f_2 by the stationary horizontal wall"
     )
 
 
+def test_bounceback_bc_vertical_stationary():
+    """
+    Stationary vertical bounceback wall at column 0 (axis=1 boundary).
+    The vertical_wall pair (l_i=3, r_i=1) maps f_3 -> f_1 with no wall term.
+    """
+    g = _make_grid(nx=6, ny=6)
+    g.bc_vertical = ['bounceback', 'periodic']
+    g.bc_horizontal = ['periodic', 'periodic']
+
+    val = 0.5
+    g.grid[:, 0, 3] = val  # f_3 (cx=-1, cy=0) at the left wall column
+
+    do_stream(g)
+
+    np.testing.assert_allclose(
+        g.grid[:, 0, 1], val, rtol=1e-12,
+        err_msg="f_3 was not reflected as f_1 by the stationary vertical wall"
+    )
+
+
+def test_bounceback_bc_horizontal_moving():
+    """
+    Moving horizontal wall at row 0 with x-velocity U_w.
+    Starting from all-zero distributions the reflected values must equal the
+    wall-correction term exactly:
+
+        wall_term = -2 * cs2_inv * w[d_i] * rho_w * (cx[d_i]*U_w + cy[d_i]*0)
+
+    Checked for the two diagonal pairs that have a non-zero x-component:
+      (d_i=7, u_i=5): cx[7]=-1  ->  wall_term = +rho_w * U_w / 6
+      (d_i=8, u_i=6): cx[8]=+1  ->  wall_term = -rho_w * U_w / 6
+    And for the straight pair where cx[4]=0 -> wall_term=0:
+      (d_i=4, u_i=2): wall_term = 0
+    """
+    rho_0 = 1.0
+    U_w = 0.01
+
+    g = _make_grid(nx=6, ny=6)
+    g.rho[:] = rho_0
+    g.bc_vertical = ['periodic', 'periodic']
+    g.bc_horizontal = ['bounceback', 'periodic']
+    g.bc_horizontal_kwarg = {'Uwall': [[U_w, 0.], [0., 0.]]}
+
+    # all distributions start at zero; rho_w = mean(rho) = rho_0
+    do_stream(g)
+
+    # w[7] = w[8] = 1/36, so 6 * w[7] * rho_0 = rho_0/6
+    expected_f5 =  rho_0 * U_w / 6.
+    expected_f6 = -rho_0 * U_w / 6.
+
+    np.testing.assert_allclose(g.grid[0, :, 5], expected_f5, rtol=1e-12,
+                               err_msg="f_5 wall correction incorrect")
+    np.testing.assert_allclose(g.grid[0, :, 6], expected_f6, rtol=1e-12,
+                               err_msg="f_6 wall correction incorrect")
+    np.testing.assert_allclose(g.grid[0, :, 2], 0., atol=1e-15,
+                               err_msg="f_2 should have no wall correction (cx[4]=0)")
+
+
 if __name__ == '__main__':
-    tests = [test_do_stream, test_calc_feq, test_do_collision,
-             test_periodic_bc, test_bounceback_bc]
-    passed = 0
-    for t in tests:
-        try:
-            t()
-            print(f"PASS  {t.__name__}")
-            passed += 1
-        except Exception as e:
-            print(f"FAIL  {t.__name__}: {e}")
-    print(f"\n{passed}/{len(tests)} tests passed.")
+    pytest.main([__file__, '-v'])
