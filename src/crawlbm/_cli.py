@@ -160,9 +160,10 @@ def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.
     x_arr, y_arr = np.meshgrid(x_axis, y_axis)
 
     uvec = np.ndarray((ny, nx, 2))
-    # set init velocity
-    uvec[:, :, 0] = -U_0 * np.cos(kx * x_arr) * np.sin(ky * y_arr)
-    uvec[:, :, 1] = U_0 * np.sin(kx * x_arr) * np.cos(ky * y_arr)
+    # set init velocity (must match the sqrt(ky/kx)/sqrt(kx/ky) amplitude
+    # factors in init_TG_vortex -- only equal to 1 when Lx == Ly)
+    uvec[:, :, 0] = -U_0 * np.sqrt(ky/kx) * np.cos(kx * x_arr) * np.sin(ky * y_arr)
+    uvec[:, :, 1] = U_0 * np.sqrt(kx/ky) * np.sin(kx * x_arr) * np.cos(ky * y_arr)
 
     for i in range(int(max_step)):
 

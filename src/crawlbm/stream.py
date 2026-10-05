@@ -16,10 +16,11 @@ def do_stream(grid):
     new_grid[:, :, 0] = grid.grid[:, :, 0]
 
     # roll each moving direction by its lattice velocity
+    # grid arrays are (ny, nx, nf): axis=0 is y (shifted by cy), axis=1 is x (shifted by cx)
     for idx in range(1, grid.nf):
         new_grid[:, :, idx] = np.roll(
-                np.roll(grid.grid[:, :, idx], axis=0, shift=grid.cx[idx]),
-                        axis=1, shift=grid.cy[idx])
+                np.roll(grid.grid[:, :, idx], axis=0, shift=grid.cy[idx]),
+                        axis=1, shift=grid.cx[idx])
 
     # apply BCs
     apply_bc(grid, new_grid)
@@ -40,31 +41,33 @@ def apply_bc(grid, new_grid):
 def periodic_bc(grid, new_grid, direction, wall):
     # just verify this worked as intended
      # check periodic. currently no check on diagonal entries
+    # grid arrays are (ny, nx, nf): vertical (x) walls live on axis=1 (columns),
+    # horizontal (y) walls live on axis=0 (rows)
     try:
-        # vertical wall
+        # vertical wall (x boundary, columns)
         if wall == 0:
             # left side
             if direction == 0:
-                assert(np.all(np.abs(new_grid[0, :, 1] - grid.grid[-1, :, 1]) < 1e-8))
+                assert(np.all(np.abs(new_grid[:, 0, 1] - grid.grid[:, -1, 1]) < 1e-8))
             # right side
             elif direction == -1:
-                assert(np.all(np.abs(new_grid[-1, :, 3] - grid.grid[0, :, 3]) < 1e-8))
+                assert(np.all(np.abs(new_grid[:, -1, 3] - grid.grid[:, 0, 3]) < 1e-8))
 
-        # horizontal wall
+        # horizontal wall (y boundary, rows)
         elif wall == 1:
-            # top
-            if direction == 0:
-                assert(np.all(np.abs(new_grid[:, 0, 2] - grid.grid[:, -1, 2]) < 1e-8))
             # bottom
+            if direction == 0:
+                assert(np.all(np.abs(new_grid[0, :, 2] - grid.grid[-1, :, 2]) < 1e-8))
+            # top
             elif direction == -1:
-                assert(np.all(np.abs(new_grid[:, -1, 4] - grid.grid[:, 0, 4]) < 1e-8))
+                assert(np.all(np.abs(new_grid[-1, :, 4] - grid.grid[0, :, 4]) < 1e-8))
 
     except AssertionError:
         print("The following should be equal:")
-        print(grid.grid[-1, 0 , 1])
-        print(new_grid[0, 0, 1])
-        print(grid.grid[0, -1 , 2])
-        print(new_grid[0, 0, 2])
+        print(grid.grid[-1, 0, 1])
+        print(new_grid[:, 0, 1][0])
+        print(grid.grid[0, -1, 2])
+        print(new_grid[0, :, 2][-1])
         raise RuntimeError('Something went wrong in periodic BCs')
 
    
@@ -89,15 +92,15 @@ def bounceback_bc(grid, new_grid, direction, wall, bc_vertical_kwarg, bc_horizon
             Uwall_right = [0., 0.]
         # left side
         if direction == 0:
-            # bounce all on left
+            # bounce all on left; l_i is the known direction incoming to the wall
             for l_i, r_i in grid.vertical_wall:
                 wall_term = wall_contrib(grid.weights[l_i], rho_w,
-                                         (grid.cx[l_i], grid.cy[l_i]), Uwall_left) 
+                                         (grid.cx[l_i], grid.cy[l_i]), Uwall_left)
                 new_grid[:, 0, r_i] = grid.grid[:, 0, l_i] + wall_term
 
         # right side
         elif direction == -1:
-            # bounce all on right
+            # bounce all on right; r_i is the known direction incoming to the wall
             for l_i, r_i in grid.vertical_wall:
                 wall_term = wall_contrib(grid.weights[r_i], rho_w,
                                          (grid.cx[r_i], grid.cy[r_i]), Uwall_right)
@@ -113,16 +116,16 @@ def bounceback_bc(grid, new_grid, direction, wall, bc_vertical_kwarg, bc_horizon
             Uwall_top = [0., 0.]
 
         if direction == 0:
-            # bounce bot wall
+            # bounce bot wall; d_i is the known direction incoming to the wall
             for d_i, u_i in grid.horizontal_wall:
                 wall_term = wall_contrib(grid.weights[d_i], rho_w,
-                                         (grid.cx[d_i], grid.cy[d_i]), Uwall_bot) 
+                                         (grid.cx[d_i], grid.cy[d_i]), Uwall_bot)
                 new_grid[0, :, u_i] = grid.grid[0, :, d_i] + wall_term
 
         elif direction == -1:
-            #bounce top wall
+            # bounce top wall; u_i is the known direction incoming to the wall
             for d_i, u_i in grid.horizontal_wall:
                 wall_term = wall_contrib(grid.weights[u_i], rho_w,
-                                         (grid.cx[u_i], grid.cy[u_i]), Uwall_top) 
+                                         (grid.cx[u_i], grid.cy[u_i]), Uwall_top)
                 new_grid[-1, :, d_i] = grid.grid[-1, :, u_i] + wall_term
 
