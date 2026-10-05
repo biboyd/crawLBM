@@ -5,7 +5,7 @@ and output them in a file.
 will start by just outputting rho, vel in numpy array
 """
 
-from collide import calc_rho, calc_u
+from .collide import calc_rho, calc_u
 import numpy as np
 
 def plot_data(grid, outname='pfile'):

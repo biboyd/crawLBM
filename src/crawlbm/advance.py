@@ -3,9 +3,9 @@ will advance the code forward. regular output etc.
 """
 
 import numpy as np
-from collide import do_collision, calc_u, calc_rho
-from stream import do_stream
-from plotfile import plot_data
+from .collide import do_collision, calc_u, calc_rho
+from .stream import do_stream
+from .plotfile import plot_data
 
 
 def advance_sim(grid, tau, dt_phy=1., max_step=1e3, VERBOSE=False, plot_int=100, plot_dir='./'):

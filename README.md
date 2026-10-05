@@ -1,13 +1,83 @@
-# crawLBM Description
-This is a very bare-bones simple LBM solver. The logic is simply I need to learn how to crawl before I learn how to walk/run. So starting off with nothing and just trying to quickly get something that works even in the most limited sense.
+# crawLBM
 
-Gonna write this up in python for ease of use and try and heavily use numpy and other packages.
+A bare-bones 2D Lattice Boltzmann Method (LBM) fluid solver written in Python.
+The logic is simply: crawl before walking or running.
 
-Goal is to quickly get a lbm solver with:
+## Features
 
-* Simple BGK operator
-* strict 2DQ9 lattice structure
-* Periodic boundary conditions
-* No forcing
+* BGK (single-relaxation-time) collision operator
+* D2Q9 lattice structure
+* Periodic and halfway bounce-back boundary conditions (including moving walls)
+* Taylor-Green Vortex and Couette Flow test problems
+* Physical unit conversion (SI inputs → lattice units)
 
-Try and get the structure and unit tests sorted out as quickly as I can. Honestly want to spend as little time as possible.
+## Installation
+
+### From PyPI
+
+```bash
+pip install crawlbm
+```
+
+### From source
+
+```bash
+git clone https://github.com/biboyd/crawLBM.git
+cd crawLBM
+pip install .
+```
+
+For development (editable install):
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+After installation, run the solver from the command line:
+
+```bash
+# Taylor-Green Vortex (default)
+crawlbm --init TG-vortex --domain_resolution 64 --max_step 1000 --plot_dir ./output
+
+# Couette Flow
+crawlbm --init Couette --domain_resolution 32 --tau 0.8 --max_step 2000 --plot_dir ./output
+```
+
+### Key options
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--init` | `TG-vortex` | Initialization type: `TG-vortex` or `Couette` |
+| `--domain_size Lx Ly` | `1 1` | Physical domain size in SI units |
+| `--domain_resolution` | `64` | Grid points along the longest dimension |
+| `--tau` | `0.8` | Relaxation time (must be > 0.5) |
+| `--nu` | `1e-6` | Physical kinematic viscosity (m²/s) |
+| `--U_ref` | `0.01` | Reference velocity scale (m/s) |
+| `--max_step` | `1000` | Number of time steps |
+| `--plot_int` | `100` | Save a plotfile every N steps |
+| `--plot_dir` | `./` | Output directory for plotfiles |
+
+### Python API
+
+```python
+from crawlbm import Grid, advance_sim
+from crawlbm._cli import init_TG_vortex
+
+grid = Grid(nx=64, ny=64)
+init_TG_vortex(grid, Lx=1.0, Ly=1.0, U_0=0.01)
+advance_sim(grid, tau=0.8, max_step=500, plot_int=100, plot_dir='./output')
+```
+
+## Running tests
+
+```bash
+pip install pytest
+pytest unit_tests/ -v
+```
+
+## Dependencies
+
+* Python >= 3.8
+* NumPy

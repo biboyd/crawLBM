@@ -1,16 +1,16 @@
 """
-Will use this to init a grid and 
+Will use this to init a grid and
 fill distribution functions
 """
 
-from argparse import ArgumentParser 
+from argparse import ArgumentParser
 from os import makedirs
 import numpy as np
 
-from grid import Grid
-from collide import calc_feq, do_init_collision,calc_u, calc_rho
-from stream import do_stream
-from advance import advance_sim
+from .grid import Grid
+from .collide import calc_feq, do_init_collision, calc_u, calc_rho
+from .stream import do_stream
+from .advance import advance_sim
 
 def run_sim(args):
 
@@ -34,7 +34,7 @@ def run_sim(args):
 
     U_lat = args.U_ref * C_t/C_x
     Ma = U_lat / np.sqrt(3)
-    
+
     # print out params
     VERBOSE = True
     if VERBOSE:
@@ -43,6 +43,7 @@ def run_sim(args):
         print(f"Spacing: {C_x} m")
         print(f"nu_lat: {nu_lat} lu^2/ts")
         print(f"U_lat: {U_lat} lu/ts")
+        print(f"Re_lat: {U_lat/nu_lat} ")
         print(f"Re: {Re}")
         print(f"Ma: {Ma}")
 
@@ -108,7 +109,7 @@ def init_TG_vortex(grid, Lx, Ly, rho_0=1., U_0=0.01, VERBOSE=False):
 
     # set init pressure
     p_0 = -rho_0 * U_0**2 * (np.cos(2*kx*x_arr) + np.cos(2*ky*y_arr)) / 4.
-    p_avg = np.mean(p_0) 
+    p_avg = np.mean(p_0)
 
     if VERBOSE:
         import matplotlib.pyplot as plt
@@ -173,7 +174,7 @@ def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.
             outfile = f"analytic{i:07d}.npy"
             out_arr = np.dstack((curr_ux, curr_uy))
             np.save(outfile, out_arr)
-            
+
 def analytic_Couette_flow(nx, ny, Lx, Ly, U_0=0.01):
     # the analytic soln should just be linear flow
     # create x-y mesh
@@ -197,7 +198,7 @@ def analytic_Couette_flow(nx, ny, Lx, Ly, U_0=0.01):
 
 def init_f_rho(grid, p_0, rho_0, p_avg):
     """
-    sets the init distributions f's and the density. Assumes a set p0 and that 
+    sets the init distributions f's and the density. Assumes a set p0 and that
     the velocities grid.uvec have been initialized
     """
     # set avg density (this is essentially just applying EOS)
@@ -230,19 +231,16 @@ def run_initialization(grid, Nsteps, tau, dt=1.):
 
     #    # propogate/stream
     #    do_stream(grid)
-    
 
-if __name__ == '__main__':
 
+def main():
     parser = ArgumentParser(
-                        prog='CrawLBM',
+                        prog='crawlbm',
                         description='Runs CrawLBM which will (very slowly) \
                                      evolve a fluid field using a LB method',
                         )
 
-    #parser.add_argument('--inputs', help='inputs file for the arg')
-
-    parser.add_argument('--domain_size', nargs=2, type=float, default=[1, 1], 
+    parser.add_argument('--domain_size', nargs=2, type=float, default=[1, 1],
                         help='Size of domain size in x and y dir (SI Units)')
 
     parser.add_argument('--domain_resolution', type=int, default=64,
@@ -265,3 +263,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     run_sim(args)
+
+
+if __name__ == '__main__':
+    main()

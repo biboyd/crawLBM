@@ -5,16 +5,12 @@ Run with:  pytest unit_tests/test_functions.py -v
        or: python unit_tests/test_functions.py
 """
 
-import sys
-import os
 import numpy as np
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from grid import Grid
-from stream import do_stream
-from collide import calc_feq, do_collision
+from crawlbm.grid import Grid
+from crawlbm.stream import do_stream
+from crawlbm.collide import calc_feq, do_collision
 
 
 def _make_grid(nx=6, ny=6):

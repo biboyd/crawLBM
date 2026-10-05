@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crawlbm"
+version = "0.1.0"
+description = "A simple 2D Lattice Boltzmann Method (LBM) fluid solver"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["lattice boltzmann", "fluid dynamics", "CFD", "LBM", "D2Q9"]
+dependencies = [
+    "numpy",
+]
+
+[project.scripts]
+crawlbm = "crawlbm._cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
