@@ -32,9 +32,11 @@ def _make_grid(nx=6, ny=6):
 def test_do_stream(idx):
     """
     Every distribution direction shifts by exactly (cx[idx], cy[idx]) in one
-    stream step.  The grid is large enough (8x8, tracer at [4,4]) that no
-    direction reaches a boundary, so periodic_bc assertions are trivially
-    satisfied without wrap-around complicating the check.
+    stream step.  Grid arrays are (ny, nx, nf): axis=0 (row, i) is y and
+    moves by cy, axis=1 (col, j) is x and moves by cx.  The grid is large
+    enough (8x8, tracer at [4,4]) that no direction reaches a boundary, so
+    periodic_bc assertions are trivially satisfied without wrap-around
+    complicating the check.
     """
     g = _make_grid(nx=8, ny=8)
     g.bc_vertical = ['periodic', 'periodic']
@@ -45,8 +47,8 @@ def test_do_stream(idx):
 
     do_stream(g)
 
-    i1 = i0 + g.cx[idx]
-    j1 = j0 + g.cy[idx]
+    i1 = i0 + g.cy[idx]
+    j1 = j0 + g.cx[idx]
     assert g.grid[i1, j1, idx] == 1.0, \
         f"dir {idx} (cx={g.cx[idx]}, cy={g.cy[idx]}): expected 1.0 at [{i1},{j1}]"
     if idx != 0:   # direction 0 is the rest distribution; it stays in place
@@ -102,20 +104,27 @@ def test_do_collision():
 def test_periodic_bc():
     """
     Under periodic BCs, a distribution that exits one boundary must re-enter
-    from the opposite boundary.  f_2 (cx=0, cy=1) is chosen because
-    periodic_bc explicitly asserts its wrap-around along axis=1.
+    from the opposite boundary.  Grid arrays are (ny, nx, nf): x lives on
+    axis=1 (columns, driven by cx) and y lives on axis=0 (rows, driven by cy).
+    f_1 (cx=1, cy=0) checks the vertical (x) wall wrap along axis=1; f_2
+    (cx=0, cy=1) checks the horizontal (y) wall wrap along axis=0.
     """
     g = _make_grid(nx=6, ny=6)
     g.bc_vertical = ['periodic', 'periodic']
     g.bc_horizontal = ['periodic', 'periodic']
 
-    # f_2 at the last column; rolling axis=1 by cy[2]=1 wraps it to column 0
-    g.grid[2, -1, 2] = 1.0
+    # f_1 at the last column; rolling axis=1 by cx[1]=1 wraps it to column 0
+    g.grid[2, -1, 1] = 1.0
+    # f_2 at the last row; rolling axis=0 by cy[2]=1 wraps it to row 0
+    g.grid[-1, 3, 2] = 1.0
 
     do_stream(g)
 
-    assert g.grid[2, 0, 2] == 1.0, "f_2 did not wrap from last column to column 0"
-    assert g.grid[2, -1, 2] == 0.0, "f_2 should have left the last column"
+    assert g.grid[2, 0, 1] == 1.0, "f_1 did not wrap from last column to column 0"
+    assert g.grid[2, -1, 1] == 0.0, "f_1 should have left the last column"
+
+    assert g.grid[0, 3, 2] == 1.0, "f_2 did not wrap from last row to row 0"
+    assert g.grid[-1, 3, 2] == 0.0, "f_2 should have left the last row"
 
 
 # ---------------------------------------------------------------------------
