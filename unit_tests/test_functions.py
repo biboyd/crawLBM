@@ -5,6 +5,7 @@ Run with:  pytest unit_tests/test_functions.py -v
        or: python unit_tests/test_functions.py
 """
 
+import argparse
 import numpy as np
 import pytest
 
@@ -198,6 +199,29 @@ def test_bounceback_bc_horizontal_moving():
     np.testing.assert_allclose(g.grid[0, :, 2], 0., atol=1e-15,
                                err_msg="f_2 should have no wall correction (cx[4]=0)")
 
+
+def _make_args(**overrides):
+    """Minimal valid argparse Namespace for run_sim."""
+    defaults = dict(
+        domain_size=[1.0, 1.0], domain_resolution=4, nu=1e-6, tau=0.8,
+        U_ref=0.01, rho_ref=1.0, init='Couette', init_steps=0,
+        max_step=1, plot_int=1, plot_dir=None,  # caller must set plot_dir
+    )
+    defaults.update(overrides)
+    return argparse.Namespace(**defaults)
+
+
+def test_tau_half_raises_value_error(tmp_path):
+    """
+    Bug 1 — tau=0.5 gives nu_lat=0, causing U_lat/nu_lat to ZeroDivisionError
+    BEFORE the tau validation check is reached.  After the fix, ValueError
+    ('tau ... <= 0.5') must be raised instead.
+    """
+    from crawlbm._cli import run_sim
+
+    args = _make_args(tau=0.5, plot_dir=str(tmp_path))
+    with pytest.raises(ValueError, match="tau"):
+        run_sim(args)
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
