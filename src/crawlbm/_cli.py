@@ -3,6 +3,7 @@ Will use this to init a grid and
 fill distribution functions
 """
 
+import os
 from argparse import ArgumentParser
 from os import makedirs
 import numpy as np
@@ -37,6 +38,14 @@ def run_sim(args):
 
     # print out params
     VERBOSE = True
+    # Verify constraints before any derived computation that assumes tau > 0.5
+    if args.tau <= 0.5:
+        raise ValueError(f"tau {args.tau} <= 0.5! Increase tau for positive viscosity.")
+    if Ma >= 0.1:
+        raise ValueError(f"Mach number {Ma:.4f} >= 0.1! Reduce U_ref or increase resolution.")
+    if args.tau >= 1.8:
+        print(f"Warning: tau {args.tau} >= 1.8 may cause numerical instability.")
+
     if VERBOSE:
         print(f"nu_phy: {args.nu} m^2/s")
         print(f"Timestep: {C_t} s")
@@ -47,13 +56,8 @@ def run_sim(args):
         print(f"Re: {Re}")
         print(f"Ma: {Ma}")
 
-        # Verify constraints
-        if Ma >= 0.1:
-            raise ValueError(f"Mach number {Ma:.4f} >= 0.1! Reduce U_ref or increase resolution.")
-        if args.tau <= 0.5:
-            raise ValueError(f"tau {args.tau} <= 0.5! Increase tau for positive viscosity.")
-        if args.tau >= 1.8:
-            print(f"Warning: tau {args.tau} >= 1.8 may cause numerical instability.")
+    # setup plot dir early so analytic solutions land in the same place
+    makedirs(args.plot_dir, exist_ok=True)
 
     init_grid = Grid(nx, ny)
 
@@ -62,21 +66,19 @@ def run_sim(args):
         init_TG_vortex(init_grid, Lx, Ly, U_0=args.U_ref)
 
         # run analytic soln
-        analytic_TG_vortex(nx, ny, Lx, Ly, args.nu, args.max_step, args.plot_int, dt_phy=C_t, U_0=args.U_ref)
+        analytic_TG_vortex(nx, ny, Lx, Ly, args.nu, args.max_step, args.plot_int,
+                            dt_phy=C_t, U_0=args.U_ref, plot_dir=args.plot_dir)
 
     elif args.init == 'Couette':
         init_Couette_flow(init_grid, U_0=args.U_ref)
 
         # run analytic soln
-        analytic_Couette_flow(nx, ny, Lx, Ly, U_0=args.U_ref)
+        analytic_Couette_flow(nx, ny, Lx, Ly, U_0=args.U_ref, plot_dir=args.plot_dir)
     else:
         raise NotImplementedError(f"{args.init} has not has been implemented. use default")
 
     # relax distribution prior to running sim
     run_initialization(init_grid, args.init_steps, args.tau)
-
-    # setup plot dir
-    makedirs(args.plot_dir, exist_ok=True)
 
     # run sim
     advance_sim(init_grid, args.tau, dt_phy = C_t, max_step=args.max_step,
@@ -146,7 +148,7 @@ def init_Couette_flow(grid, rho_0=1., U_0=0.01):
     grid.bc_horizontal_kwarg = dict(Uwall=[[0., 0.],
                                            [U_0, 0.]])
 
-def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.01):
+def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.01, plot_dir='./'):
     # calc viscous time
     kx = 2 * np.pi / Lx
     ky = 2 * np.pi / Ly
@@ -171,11 +173,11 @@ def analytic_TG_vortex(nx, ny, Lx, Ly, nu, max_step, plot_int, dt_phy=1., U_0=0.
             curr_uy = uvec[:, :, 1] * np.exp(-time*t_c_inv)
 
             #save plotfile
-            outfile = f"analytic{i:07d}.npy"
+            outfile = os.path.join(plot_dir, f"analytic{i:07d}.npy")
             out_arr = np.dstack((curr_ux, curr_uy))
             np.save(outfile, out_arr)
 
-def analytic_Couette_flow(nx, ny, Lx, Ly, U_0=0.01):
+def analytic_Couette_flow(nx, ny, Lx, Ly, U_0=0.01, plot_dir='./'):
     # the analytic soln should just be linear flow
     # create x-y mesh
     x_axis = np.linspace(0, Lx, nx)
@@ -192,9 +194,8 @@ def analytic_Couette_flow(nx, ny, Lx, Ly, U_0=0.01):
     u_vec[:, :, 1] = 0.
 
     #save plotfile
-    outfile = f"analytic_solution.npy"
-    out_arr = u_vec
-    np.save(outfile, out_arr)
+    outfile = os.path.join(plot_dir, "analytic_solution.npy")
+    np.save(outfile, u_vec)
 
 def init_f_rho(grid, p_0, rho_0, p_avg):
     """

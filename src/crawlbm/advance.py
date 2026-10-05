@@ -2,6 +2,7 @@
 will advance the code forward. regular output etc.
 """
 
+import os
 import numpy as np
 from .collide import do_collision, calc_u, calc_rho
 from .stream import do_stream
@@ -14,7 +15,7 @@ def advance_sim(grid, tau, dt_phy=1., max_step=1e3, VERBOSE=False, plot_int=100,
     some of the data.
     """
 
-    plot_data(grid, outname='plt_after_initialization.npy')
+    plot_data(grid, outname=os.path.join(plot_dir, 'plt_after_initialization.npy'))
     for i in range(int(max_step)):
 
         if VERBOSE:

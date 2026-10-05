@@ -12,11 +12,11 @@ def do_stream(grid):
 
     new_grid = np.empty_like(grid.grid)
 
-    # copy index zero
+    # direction 0 is the rest distribution (cx=cy=0); copy it directly
     new_grid[:, :, 0] = grid.grid[:, :, 0]
 
-    # using numpy's roll does periodic
-    for idx in range(grid.nf):
+    # roll each moving direction by its lattice velocity
+    for idx in range(1, grid.nf):
         new_grid[:, :, idx] = np.roll(
                 np.roll(grid.grid[:, :, idx], axis=0, shift=grid.cx[idx]),
                         axis=1, shift=grid.cy[idx])
