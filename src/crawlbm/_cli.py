@@ -34,6 +34,7 @@ def run_sim(args):
     #C_rho = args.rho_ref / 1.0 # assuming rho_lat = 1
 
     U_lat = args.U_ref * C_t/C_x
+    L_lat = max(Lx, Ly) /C_x
     Ma = U_lat / np.sqrt(3)
 
     # print out params
@@ -52,7 +53,7 @@ def run_sim(args):
         print(f"Spacing: {C_x} m")
         print(f"nu_lat: {nu_lat} lu^2/ts")
         print(f"U_lat: {U_lat} lu/ts")
-        print(f"Re_lat: {U_lat/nu_lat} ")
+        print(f"Re_lat: {U_lat*L_lat/nu_lat} ")
         print(f"Re: {Re}")
         print(f"Ma: {Ma}")
 
