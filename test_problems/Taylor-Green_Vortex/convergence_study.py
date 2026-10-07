@@ -107,16 +107,17 @@ def run_tg(nx, ny, t_star_target, tau=1.0, U_0=0.01):
 def main():
     # set params
     tau = 0.9
-    U_0 = 0.01
+    U_start = 0.04
     t_star = 1.0
     resolutions = np.array([16, 32, 64, 128, 256])
+    U_arr = U_start * 0.5**np.arange(0, len(resolutions))
 
     print(f"Taylor-Green vortex convergence study at fixed dimensionless time "
           f"nu*(kx^2+ky^2)*t = {t_star}:")
 
     # loop over resolutions
     errors = []
-    for n in resolutions:
+    for n, U_0 in zip(resolutions, U_arr):
         nx = int(n)
         ny = int(n)
 
