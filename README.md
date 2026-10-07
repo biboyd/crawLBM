@@ -3,6 +3,8 @@
 A bare-bones 2D Lattice Boltzmann Method (LBM) fluid solver written in Python.
 The logic is simply: crawl before walking or running.
 
+![Heat maps of the x-velocity at specific snapshots](test_problems/Taylor-Green_Vortex/tgv_heatmap_snapshots.png)
+
 ## Features
 
 * BGK (single-relaxation-time) collision operator
