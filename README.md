@@ -16,7 +16,7 @@ The logic is simply: crawl before walking or running.
 ### From PyPI
 
 ```bash
-pip install crawlbm
+pip install crawLBM
 ```
 
 ### From source
