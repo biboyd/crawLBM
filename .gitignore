@@ -1,5 +1,6 @@
 *.npy
 __pycache__
-*.png
+images/
+analytic_images/
 *.mp4
 *.egg-info*
