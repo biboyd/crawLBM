@@ -66,7 +66,7 @@ def analytic_tg(nx, ny, t_star, U_0=0.01):
 
     # calc velocity
     ux = -U_0 * np.sqrt(ky/kx) * np.cos(kx * x_arr) * np.sin(ky * y_arr) * decay
-    uy = U_0 * np.sqrt(ky/kx) * np.sin(kx * x_arr) * np.cos(ky * y_arr) * decay
+    uy = U_0 * np.sqrt(kx/ky) * np.sin(kx * x_arr) * np.cos(ky * y_arr) * decay
     return ux, uy
 
 
