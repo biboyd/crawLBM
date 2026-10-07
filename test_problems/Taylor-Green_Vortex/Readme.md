@@ -1,6 +1,11 @@
 # Taylor-Green Vortex Decay
 This demonstrates a couple ways to setup the Taylor-Green vortex decay problem. 
 
+The flow is initialized in a sinusoidal manner and evolves by exponentially decaying over time. By running `python plot_snapshots.py`, we can produce plots for the velocity overtime:
+
+![Heat maps of the x-velocity at specific snapshots](tgv_heatmap_snapshots.png)
+![Mean velocity magnitude over time showing TGV exponential decay](tgv_mean_speed_vs_time.png)
+
 ## Convergence Test
 Here a simple python script utlitizes the `Grid` class as well as the `do_stream` and `do_collision` functions to evolve the simulation.
 
