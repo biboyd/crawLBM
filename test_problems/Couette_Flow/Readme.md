@@ -16,5 +16,7 @@ We test a number of resolutions from 4x8 to 4x128. Each jump in resolution corre
 
 The standard LBM implemented here should be second order accurate.
 
+![second order convergence of Couette flow as it relaxes to linear profile](couette_convergence.png)
+
 ## Single sim run
 The Couette problem is implemented in `crawLBM` and can be run from the command line as shown using the `run_couette.sh` bash script and accompanying python file `init_sim.py`. These output a number of plots and looks how the simulation evolves to the analytic steady state solution.

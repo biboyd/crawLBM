@@ -13,5 +13,7 @@ We test a number of resolutions from 16x16 to 256x256. Each jump in resolution c
 
 The standard LBM implemented here should be second order accurate.
 
+![second order convergence of the 2D TGV problem](tgv_convergence.png)
+
 ## Single sim run
 The TGV problem is implemented in `crawLBM` and can be run from the command line as shown using the `run_TGV.sh` bash script and accompanying python file `init_sim.py`. These output a number of plots and try to compare the simulation results to the analytic solution.

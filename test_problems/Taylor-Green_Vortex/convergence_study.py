@@ -146,7 +146,6 @@ def main():
     ax.set_title(fr'2D Taylor-Green vortex decay: convergence at '
                  fr'$\nu(k_x^2+k_y^2)t={t_star}$')
     ax.legend()
-    ax.grid(True, which='both', alpha=0.3)
     fig.tight_layout()
     fig.savefig('tgv_convergence.png', dpi=150)
     print("\nSaved tgv_convergence.png")
