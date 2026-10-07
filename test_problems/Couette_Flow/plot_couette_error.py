@@ -12,7 +12,7 @@ def main(infiles, outdir):
     mag_ax.set_ylabel(f'mean |U|/u_0')
     mag_ax.set_xlabel('time')
 
-    analytic_vel = np.load('analytic_solution.npy')
+    analytic_vel = np.load('plotfiles/analytic_solution.npy')
     for f in infiles:
         # extract base file name
         basefile = f.split('/')[-1]
@@ -31,7 +31,7 @@ def main(infiles, outdir):
         ana_vel = analytic_vel[:, :, 0]
 
         # calc rel diff |delU/Uanalytic|
-        u_0 = 0.01
+        u_0 = np.max(ana_vel)
         rel_diff  = np.abs(vel - ana_vel)/u_0
 
         # calc rms
@@ -94,4 +94,5 @@ if __name__ == '__main__':
                         help='directory to plot out to')
     args = parser.parse_args()
 
-    main(args.input_files, args.outdir, )
+    main(args.input_files, args.outdir)
+
