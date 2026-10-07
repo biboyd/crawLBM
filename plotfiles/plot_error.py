@@ -17,7 +17,7 @@ def main(infiles, outdir, minmax_list=None):
         # extract base file name
         basefile = f.split('/')[-1]
         basename = basefile.removesuffix('.npy')
-        analytic_name = f"analytic{basename.removeprefix('plt')}"
+        analytic_name = f"plotfiles/analytic{basename.removeprefix('plt')}"
 
 
         # recover time from basename
@@ -64,7 +64,7 @@ def main(infiles, outdir, minmax_list=None):
                 time_ax.plot(t, rms, tmark, color=tcolor, label=f'rms {name}')
             else:
                 time_ax.plot(t, rms, tmark, color=tcolor)
-                print(f'Time: {t:0.2e}; Err: {rms:0.4e}')
+                print(f'Step: {t:0.2e}; Err: {rms:0.4e}')
 
         mean_mag = np.mean( np.sqrt(curr_vel[:, :, 0]**2 + curr_vel[:, :, 1]**2)   )
         mag_ax.plot(t, mean_mag/u_0, 'ko', ) 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('input_files', nargs='*', type=str, 
                         help='files to plot out')
 
-    parser.add_argument('-o', '--outdir', nargs=1, type=str, 
+    parser.add_argument('-o', '--outdir', type=str, 
                         default='./',
                         help='directory to plot out to')
     args = parser.parse_args()
