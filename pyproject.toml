@@ -8,11 +8,38 @@ version = "0.1.0"
 description = "A simple 2D Lattice Boltzmann Method (LBM) fluid solver"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
-keywords = ["lattice boltzmann", "fluid dynamics", "CFD", "LBM", "D2Q9"]
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Brendan Boyd" },
+]
+keywords = ["lattice boltzmann", "fluid dynamics", "CFD", "LBM"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 dependencies = [
     "numpy",
 ]
+
+[project.optional-dependencies]
+plot = [
+    "matplotlib",
+]
+
+[project.urls]
+Homepage = "https://github.com/biboyd/crawLBM"
+Source = "https://github.com/biboyd/crawLBM"
+Issues = "https://github.com/biboyd/crawLBM/issues"
 
 [project.scripts]
 crawlbm = "crawlbm._cli:main"

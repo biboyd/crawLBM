@@ -82,6 +82,12 @@ pytest unit_tests/ -v
 * Python >= 3.8
 * NumPy
 
+Matplotlib is an optional dependency used by the plotting scripts in `plotfiles/` and `test_problems/`. Install it with:
+
+```bash
+pip install crawlbm[plot]
+```
+
 ## LLM Acknowledgement
 Core functions and functionality were written by Brendan Boyd. Unit tests, convergence tests, and cleaning up the codebase to work as a python package was implemented via Claude Code.
 
